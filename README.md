@@ -18,5 +18,3 @@ Proyecto
 2. Copia la URL del servidor y actualízala en `configuration.py`.
 3. Instala pytest dentro del entorno virtual con: 'python -m pip install pytest'
 4. Ejecuta las pruebas con: 'python -m pytest -v'
-
-(Actualización de pruebas y configuración del proyecto)
