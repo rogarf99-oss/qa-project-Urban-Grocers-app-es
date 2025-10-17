@@ -1,6 +1,3 @@
-<<<<<<< HEAD
-# Proyecto Urban Grocers 
-=======
 
 Proyecto Sprint 8 - Urban Grocers App
 
@@ -22,4 +19,4 @@ Proyecto
 3. Instala pytest dentro del entorno virtual con: 'python -m pip install pytest'
 4. Ejecuta las pruebas con: 'python -m pytest -v'
 
->>>>>>> 3eb05f3 (Actualización de pruebas y configuración del proyecto)
+(Actualización de pruebas y configuración del proyecto)
