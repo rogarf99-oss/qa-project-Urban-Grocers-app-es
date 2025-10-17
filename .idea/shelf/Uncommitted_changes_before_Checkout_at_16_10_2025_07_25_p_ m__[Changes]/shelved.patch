@@ -1,0 +1,361 @@
+Index: data.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/data.py b/data.py
+--- a/data.py	(revision f832a9a42ffdfca6a5cd56e2e03da2cc3dd8e056)
++++ b/data.py	(date 1760663837462)
+@@ -1,0 +1,12 @@
++
++kit_bodies = {
++    "min_char": {"name": "a"},
++    "max_char": {"name": "A"*511},
++    "too_long": {"name": "A"*513},
++    "empty": {"name": ""},
++    "special_characters": {"name": "!@#$%^&*()_+-={}[]|;:,.<>?/"},
++    "with_spaces": {"name": " A Aaa "},
++    "numbers": {"name": "123"},
++    "not_passed": {},
++    "wrong_type": {"name": 123}
++}
+Index: sender_stand_request.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/sender_stand_request.py b/sender_stand_request.py
+--- a/sender_stand_request.py	(revision f832a9a42ffdfca6a5cd56e2e03da2cc3dd8e056)
++++ b/sender_stand_request.py	(date 1760663837463)
+@@ -1,0 +1,10 @@
++import requests
++from configuration import USERS_URL, KITS_URL
++
++# Token fijo pruebas
++AUTH_TOKEN = "48edca05-3479-4d3b-accc-7c4af4729dd2"
++
++def post_new_client_kit(kit_body, auth_token=AUTH_TOKEN):
++    headers = {"Authorization": f"Bearer {auth_token}", "Content-Type": "application/json"}
++    response = requests.post(KITS_URL, json=kit_body, headers=headers)
++    return response
+\ No newline at end of file
+Index: create_kit_name_kit_test.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/create_kit_name_kit_test.py b/create_kit_name_kit_test.py
+--- a/create_kit_name_kit_test.py	(revision f832a9a42ffdfca6a5cd56e2e03da2cc3dd8e056)
++++ b/create_kit_name_kit_test.py	(date 1760663837461)
+@@ -1,0 +1,50 @@
++
++import pytest
++from data import kit_bodies
++from sender_stand_request import post_new_client_kit
++
++import json
++
++@pytest.fixture(scope="module")
++def auth_token():
++    # token fijo
++    return "48edca05-3479-4d3b-accc-7c4af4729dd2"
++
++# Funciones de assertion
++def positive_assert(kit_body, auth_token):
++    response = post_new_client_kit(kit_body, auth_token)
++    assert response.status_code == 201
++    assert response.json()["name"] == kit_body["name"]
++
++def negative_assert_code_400(kit_body, auth_token):
++    response = post_new_client_kit(kit_body, auth_token)
++    assert response.status_code == 400
++
++# Tests positivos
++def test_kit_name_min_char(auth_token):
++    positive_assert(kit_bodies["min_char"], auth_token)
++
++def test_kit_name_max_char(auth_token):
++    positive_assert(kit_bodies["max_char"], auth_token)
++
++def test_kit_name_special_characters(auth_token):
++    positive_assert(kit_bodies["special_characters"], auth_token)
++
++def test_kit_name_with_spaces(auth_token):
++    positive_assert(kit_bodies["with_spaces"], auth_token)
++
++def test_kit_name_numbers(auth_token):
++    positive_assert(kit_bodies["numbers"], auth_token)
++
++# Tests negativos
++def test_kit_name_empty(auth_token):
++    negative_assert_code_400(kit_bodies["empty"], auth_token)
++
++def test_kit_name_too_long(auth_token):
++    negative_assert_code_400(kit_bodies["too_long"], auth_token)
++
++def test_kit_name_not_passed(auth_token):
++    negative_assert_code_400(kit_bodies["not_passed"], auth_token)
++
++def test_kit_name_wrong_type(auth_token):
++    negative_assert_code_400(kit_bodies["wrong_type"], auth_token)
+\ No newline at end of file
+Index: configuration.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>URL_SERVICE = # Inserta tu dirección de URL sin la barra diagonal al final\r\nCREATE_USER_PATH = # Almacena la ruta para crear un usuario o usuaria en esta variable\r\nKITS_PATH = # Almacena la ruta para crear un kit en esta variable\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/configuration.py b/configuration.py
+--- a/configuration.py	(revision f832a9a42ffdfca6a5cd56e2e03da2cc3dd8e056)
++++ b/configuration.py	(date 1760664261940)
+@@ -1,3 +1,4 @@
+-URL_SERVICE = # Inserta tu dirección de URL sin la barra diagonal al final
+-CREATE_USER_PATH = # Almacena la ruta para crear un usuario o usuaria en esta variable
+-KITS_PATH = # Almacena la ruta para crear un kit en esta variable
++
++URL_SERVICE = "https://cnt-f512a582-522b-493a-bd27-c8ff1f65a62e.containerhub.tripleten-services.com"
++USERS_URL = f"{URL_SERVICE}/api/v1/users"
++KITS_URL = f"{URL_SERVICE}/api/v1/kits"
+\ No newline at end of file
+Index: README.md
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+># Proyecto Urban Grocers \r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/README.md b/README.md
+--- a/README.md	(revision f832a9a42ffdfca6a5cd56e2e03da2cc3dd8e056)
++++ b/README.md	(date 1760664232977)
+@@ -1,1 +1,16 @@
+-# Proyecto Urban Grocers 
++# QA Project - Urban Grocers
++
++Proyecto de pruebas automáticas con Pytest para la API de Urban Grocers.
++
++## Archivos
++- configuration.py → URLs del servicio
++- data.py → cuerpos de solicitud para tests
++- sender_stand_request.py → funciones para enviar solicitudes POST
++- create_kit_name_kit_test.py → pruebas de creación de kits
++- .gitignore → archivos ignorados por Git
++- README.md → descripción del proyecto
++
++## Cómo ejecutar
++1. Activar el entorno virtual:
++   ```bash
++   .venv\Scripts\activate
+\ No newline at end of file
+Index: requirements.txt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-16LE
+===================================================================
+diff --git a/requirements.txt b/requirements.txt
+new file mode 100644
+--- /dev/null	(date 1760663837463)
++++ b/requirements.txt	(date 1760663837463)
+@@ -0,0 +1,11 @@
++certifi==2025.10.5
++charset-normalizer==3.4.4
++colorama==0.4.6
++idna==3.11
++iniconfig==2.1.0
++packaging==25.0
++pluggy==1.6.0
++Pygments==2.19.2
++pytest==8.4.2
++requests==2.32.5
++urllib3==2.5.0
+Index: .gitignore.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.gitignore.py b/.gitignore.py
+new file mode 100644
+--- /dev/null	(date 1760663837448)
++++ b/.gitignore.py	(date 1760663837448)
+@@ -0,0 +1,3 @@
++__pycache__/
++*.pyc
++.venv/
+\ No newline at end of file
+Index: .idea/qa-project-Urban-Grocers-app-es.iml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/qa-project-Urban-Grocers-app-es.iml b/.idea/qa-project-Urban-Grocers-app-es.iml
+new file mode 100644
+--- /dev/null	(date 1760663837451)
++++ b/.idea/qa-project-Urban-Grocers-app-es.iml	(date 1760663837451)
+@@ -0,0 +1,10 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<module type="PYTHON_MODULE" version="4">
++  <component name="NewModuleRootManager">
++    <content url="file://$MODULE_DIR$">
++      <excludeFolder url="file://$MODULE_DIR$/.venv" />
++    </content>
++    <orderEntry type="jdk" jdkName="Python 3.14 (qa-project-Urban-Grocers-app-es)" jdkType="Python SDK" />
++    <orderEntry type="sourceFolder" forTests="false" />
++  </component>
++</module>
+\ No newline at end of file
+Index: .idea/misc.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/misc.xml b/.idea/misc.xml
+new file mode 100644
+--- /dev/null	(date 1760663837450)
++++ b/.idea/misc.xml	(date 1760663837450)
+@@ -0,0 +1,7 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<project version="4">
++  <component name="Black">
++    <option name="sdkName" value="Python 3.14 (qa-project-Urban-Grocers-app-es)" />
++  </component>
++  <component name="ProjectRootManager" version="2" project-jdk-name="Python 3.14 (qa-project-Urban-Grocers-app-es)" project-jdk-type="Python SDK" />
++</project>
+\ No newline at end of file
+Index: .idea/inspectionProfiles/profiles_settings.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/inspectionProfiles/profiles_settings.xml b/.idea/inspectionProfiles/profiles_settings.xml
+new file mode 100644
+--- /dev/null	(date 1760663837449)
++++ b/.idea/inspectionProfiles/profiles_settings.xml	(date 1760663837449)
+@@ -0,0 +1,6 @@
++<component name="InspectionProjectProfileManager">
++  <settings>
++    <option name="USE_PROJECT_PROFILE" value="false" />
++    <version value="1.0" />
++  </settings>
++</component>
+\ No newline at end of file
+Index: .idea/modules.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/modules.xml b/.idea/modules.xml
+new file mode 100644
+--- /dev/null	(date 1760663837451)
++++ b/.idea/modules.xml	(date 1760663837451)
+@@ -0,0 +1,8 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<project version="4">
++  <component name="ProjectModuleManager">
++    <modules>
++      <module fileurl="file://$PROJECT_DIR$/.idea/qa-project-Urban-Grocers-app-es.iml" filepath="$PROJECT_DIR$/.idea/qa-project-Urban-Grocers-app-es.iml" />
++    </modules>
++  </component>
++</project>
+\ No newline at end of file
+Index: .idea/workspace.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/workspace.xml b/.idea/workspace.xml
+new file mode 100644
+--- /dev/null	(date 1760664041752)
++++ b/.idea/workspace.xml	(date 1760664041752)
+@@ -0,0 +1,74 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<project version="4">
++  <component name="AutoImportSettings">
++    <option name="autoReloadType" value="SELECTIVE" />
++  </component>
++  <component name="ChangeListManager">
++    <list default="true" id="1ad16b8c-a408-4c4b-ad2c-e56917c759d0" name="Changes" comment="">
++      <change afterPath="$PROJECT_DIR$/.gitignore.py" afterDir="false" />
++      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" afterDir="false" />
++      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
++      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
++      <change afterPath="$PROJECT_DIR$/.idea/qa-project-Urban-Grocers-app-es.iml" afterDir="false" />
++      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
++      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
++      <change afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/configuration.py" beforeDir="false" afterPath="$PROJECT_DIR$/configuration.py" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/create_kit_name_kit_test.py" beforeDir="false" afterPath="$PROJECT_DIR$/create_kit_name_kit_test.py" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/data.py" beforeDir="false" afterPath="$PROJECT_DIR$/data.py" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/sender_stand_request.py" beforeDir="false" afterPath="$PROJECT_DIR$/sender_stand_request.py" afterDir="false" />
++    </list>
++    <option name="SHOW_DIALOG" value="false" />
++    <option name="HIGHLIGHT_CONFLICTS" value="true" />
++    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
++    <option name="LAST_RESOLUTION" value="IGNORE" />
++  </component>
++  <component name="FileTemplateManagerImpl">
++    <option name="RECENT_TEMPLATES">
++      <list>
++        <option value="Python Script" />
++      </list>
++    </option>
++  </component>
++  <component name="Git.Settings">
++    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
++  </component>
++  <component name="ProjectColorInfo">{
++  &quot;associatedIndex&quot;: 3
++}</component>
++  <component name="ProjectId" id="34AQRgTL0ClgDde41lBDFVeJl2S" />
++  <component name="ProjectViewState">
++    <option name="hideEmptyMiddlePackages" value="true" />
++    <option name="showLibraryContents" value="true" />
++  </component>
++  <component name="PropertiesComponent"><![CDATA[{
++  "keyToString": {
++    "ModuleVcsDetector.initialDetectionPerformed": "true",
++    "RunOnceActivity.ShowReadmeOnStart": "true",
++    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
++    "RunOnceActivity.git.unshallow": "true",
++    "git-widget-placeholder": "Rebasing main",
++    "junie.onboarding.icon.badge.shown": "true",
++    "settings.editor.selected.configurable": "inlay.hints",
++    "to.speed.mode.migration.done": "true"
++  }
++}]]></component>
++  <component name="SharedIndexes">
++    <attachedChunks>
++      <set>
++        <option value="bundled-python-sdk-164cda30dcd9-0af03a5fa574-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-252.26830.99" />
++      </set>
++    </attachedChunks>
++  </component>
++  <component name="TaskManager">
++    <task active="true" id="Default" summary="Default task">
++      <changelist id="1ad16b8c-a408-4c4b-ad2c-e56917c759d0" name="Changes" comment="" />
++      <created>1760653890173</created>
++      <option name="number" value="Default" />
++      <option name="presentableId" value="Default" />
++      <updated>1760653890173</updated>
++    </task>
++    <servers />
++  </component>
++</project>
+\ No newline at end of file
+Index: .idea/vcs.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/vcs.xml b/.idea/vcs.xml
+new file mode 100644
+--- /dev/null	(date 1760663837452)
++++ b/.idea/vcs.xml	(date 1760663837452)
+@@ -0,0 +1,6 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<project version="4">
++  <component name="VcsDirectoryMappings">
++    <mapping directory="$PROJECT_DIR$" vcs="Git" />
++  </component>
++</project>
+\ No newline at end of file
